@@ -8,15 +8,15 @@ with open ("passwords.txt", "r") as myfile:
     keysAndPasses = myfile.read()
 
 keysAndPasses = eval(keysAndPasses)
+
 #openweathermap.org
+
 OPEN_WEATHER_API_KEY = keysAndPasses["OPEN_WEATHER_API_KEY"]
-BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
+BASE_URL = "https://api.openweathermap.org/data/2.5/"
 
-def getCurrentWeather():
-    zipCode = "19044"
-    countryCode = "US"
-
-    completeUrl = (BASE_URL + "zip=" + zipCode + "," + countryCode
+#Gets the current weather at a certain zipcode in a specific country
+def getCurrentWeather(zipCode, countryCode):
+    completeUrl = (BASE_URL + "weather?" + "zip=" + zipCode + "," + countryCode
                     + "&appid=" + OPEN_WEATHER_API_KEY)
 
     #Get data and extract in JSON format
@@ -53,11 +53,12 @@ def getCurrentWeather():
                                         + u" \N{DEGREE SIGN}C")
         #Capitalize every word in the description
         formattedResponse["Description"] = \
-            " ".join(list(map(lambda x: x.capitalize(),(weatherDesc.split(" ")))))
+    " ".join(list(map(lambda x: x.capitalize(), (weatherDesc.split(" ")))))
 
         formattedResponse["Pressure"] = str(currPres) + " hPa"
         formattedResponse["Humidity"] = str(currHum) + " %"
-        formattedResponse["WindSpeed"] = str(round((windSpeed * 2.236936), 1)) + " mph"
+        formattedResponse["WindSpeed"] = (str(round((windSpeed * 2.236936), 1))
+                                    + " mph")
 
         return formattedResponse
 
