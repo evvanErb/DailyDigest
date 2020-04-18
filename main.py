@@ -5,11 +5,13 @@ format them in a readable format, and email the result to end users"""
 from newsScrapper import getMajorHeadlines
 from weatherScrapper import getCurrentWeather
 from sendMail import sendMassIndividualEmails
+import schedule
+import time
 
 with open ("endUserEmails.txt", "r") as myfile:
     emails = myfile.read()
 
-USER_EMAILS = eval(emails)
+USER_DATA = eval(emails)
 
 def formatMessage(weatherData, newsData):
     #Extract Weather Data
@@ -62,8 +64,11 @@ def main():
 
     messageContent = formatMessage(weatherData, newsData)
 
-    sendMassIndividualEmails(messageContent, USER_EMAILS)
+    sendMassIndividualEmails(messageContent, USER_DATA)
 
 if __name__ == "__main__":
     # execute only if run as a script
-    main()
+    schedule.every().day.at("08:00").do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
