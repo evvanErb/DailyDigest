@@ -12,6 +12,3 @@ Uses newsapi.org for top news stories,
 Uses requests, json, smtplib, email, schedule, datetime, & time libraries
 
 To Run: python3 main.py
-
-TODO:
-Allow zip code to be tied to user email instead of hard coded
