@@ -2,21 +2,70 @@
 results for easy reading"""
 #Python 3.x
 
-import requests, json
+import requests, json, re
+from bs4 import BeautifulSoup
 
 with open ("passwords.txt", "r") as myfile:
     keysAndPasses = myfile.read()
 
 keysAndPasses = eval(keysAndPasses)
 
-#openweathermap.org
+with open ("settings.txt", "r") as myfile:
+    settings = myfile.read()
 
+settings = eval(settings)
+
+WEATHER_SCRAPE = settings["WEATHER_SCRAPE"]
 OPEN_WEATHER_API_KEY = keysAndPasses["OPEN_WEATHER_API_KEY"]
-BASE_URL = "https://api.openweathermap.org/data/2.5/"
+WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/"
+WEATHER_SCRAPE_URL = "https://weather.com/weather/today/l/"
+
+#Screapes weather.com for todays weather at zipcode
+def getTodaysWeatherScrape(zipCode, countryCode):
+    completeUrl = WEATHER_SCRAPE_URL + zipCode
+
+    #Get HTML data and setup soup
+    page = requests.get(completeUrl)
+    soup = BeautifulSoup(page.content, "html.parser")
+
+    #Find proper HTML sections
+    tempElems = soup.find("div", class_="today_nowcard-temp")
+    phraseElems = soup.find("div", class_="today_nowcard-phrase")
+    panelElems = soup.find("div", class_="today_nowcard-sidecar component panel")
+
+    #Extract text from found HTML
+    tempExtracted = tempElems.text
+    phraseExtracted = phraseElems.text
+    panelExtracted = panelElems.text
+
+    tempF = tempExtracted + " F"
+
+    #Convert F to C
+    rawTempC = round(((float(tempExtracted[:-1]) - 32) * (5/9)), 1)
+    tempC = str(rawTempC) + tempExtracted[-1] + " C"
+
+    #Extract proper data from panel via regex
+    humidity = (re.findall("[0-9]+%", panelExtracted))[0]
+    windSpeed = (re.findall("[A-Z]+ [0-9]+ mph", panelExtracted))[0]
+    pressureRaw = (re.findall("Pressure[0-9]+\.*[0-9]*", panelExtracted))[0]
+    pressure = (re.findall("[0-9]+\.*[0-9]*", pressureRaw))[0]
+
+    #Add data to dictionary to return
+    formattedResponse = {}
+    formattedResponse["TempF"] = tempF
+    formattedResponse["TempC"] = tempC
+    formattedResponse["Description"] = phraseExtracted
+
+    formattedResponse["Pressure"] = pressure + " in"
+    formattedResponse["Humidity"] = humidity
+    formattedResponse["WindSpeed"] = windSpeed
+
+    return formattedResponse
 
 #Gets the current weather at a certain zipcode in a specific country
-def getCurrentWeather(zipCode, countryCode):
-    completeUrl = (BASE_URL + "weather?" + "zip=" + zipCode + "," + countryCode
+def getCurrentWeatherAPI(zipCode, countryCode):
+    completeUrl = (WEATHER_API_URL + "weather?" + "zip=" +
+                    zipCode + "," + countryCode
                     + "&appid=" + OPEN_WEATHER_API_KEY)
 
     #Get data and extract in JSON format
@@ -65,3 +114,10 @@ def getCurrentWeather(zipCode, countryCode):
     else:
         raise Exception ("[!] Error #1: Could not access weather data cod: "
                             + str(jsonData["cod"]))
+
+#If scrape for weather true then scrape else use api
+def getWeather(zipCode, countryCode):
+    if WEATHER_SCRAPE:
+        return getTodaysWeatherScrape(zipCode, countryCode)
+    else:
+        return getCurrentWeatherAPI(zipCode, countryCode)

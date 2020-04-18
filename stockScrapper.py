@@ -29,7 +29,7 @@ def getStockOCData(symbol):
 
     formattedResponse = {}
 
-    if len(jsonData) > 0:
+    try:
         #Get todays date
         today = datetime.date.today()
         yesterday = today - datetime.timedelta(days=1)
@@ -65,8 +65,9 @@ def getStockOCData(symbol):
 
         return formattedResponse
 
-    else:
-        raise Exception ("[!] Error #1: Could not access stock data: " + symbol)
+    except:
+        raise Exception ("[!] Error #1: Could not access stock data: "
+                + symbol + " : " + jsonData)
 
 
 #Gets Open today / Close yest prices of the 3 main

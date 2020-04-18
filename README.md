@@ -9,6 +9,10 @@ Uses newsapi.org for top news stories,
  openweathermap.org for current weather,
  and alphavantage.co for stock data.
 
-Uses requests, json, smtplib, email, schedule, datetime, & time libraries
+ Can Web Scrape for weather data in which case it scrapes weather.com for
+ weather data instead of using openweathermap.org
+
+Uses requests, json, smtplib, email, schedule, datetime,
+ bs4, re, & time libraries
 
 To Run: python3 main.py

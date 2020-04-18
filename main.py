@@ -3,7 +3,7 @@ format them in a readable format, and email the result to end users"""
 #Python 3.x
 
 from newsScrapper import getMajorHeadlines
-from weatherScrapper import getCurrentWeather
+from weatherScrapper import getWeather
 from sendMail import sendMassIndividualEmails
 from stockScrapper import getMainThreeStocks
 import schedule
@@ -56,12 +56,16 @@ def formatMessage(weatherData, newsData, stockData):
     htmlMessage += "<br><br><h2>Top News Stories</h2>"
     #Iterate over all articles and add them to the HTML message
     for article in articles:
-        htmlMessage += ("<br><b>Title: </b>" + article["Title"]
-        + "<br><br><b>Source: </b>" + article["SourceName"]
-        + "<br><b>Date Published: </b>" + article["PublishDate"]
-        + "<br><br><b>URL: </b>" + article["Url"]
-        + "<br><br><b>Description: </b>" + article["Description"]
-        + "<br><br>----------------------<br>")
+        htmlMessage += "<br><b>Title: </b>" + article["Title"]
+        htmlMessage += "<br><br><b>Source: </b>" + article["SourceName"]
+        htmlMessage += "<br><b>Date Published: </b>" + article["PublishDate"]
+        htmlMessage += "<br><br><b>URL: </b>" + article["Url"]
+        try:
+            htmlMessage += ("<br><br><b>Description: </b>"
+                + article["Description"])
+        except:
+            print("[!] No Article Description: " + article["Title"])
+        htmlMessage += "<br><br>----------------------<br>"
 
     #End HTML
     htmlMessage += ("""
@@ -73,7 +77,7 @@ def formatMessage(weatherData, newsData, stockData):
     return htmlMessage
 
 def main():
-    weatherData = getCurrentWeather("19044", "US")
+    weatherData = getWeather("19044", "US")
     newsData = getMajorHeadlines()
     stockData = getMainThreeStocks()
 
